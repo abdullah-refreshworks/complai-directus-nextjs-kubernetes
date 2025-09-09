@@ -36,6 +36,8 @@ spec:
             secretKeyRef:
               name: complai-secrets
               key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
