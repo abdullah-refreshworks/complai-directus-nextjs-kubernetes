@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -21,7 +19,7 @@ services:
       retries: 5
 
   directus:
-    build: ./directus
+    image: directus/directus:latest
     container_name: complai-directus
     restart: unless-stopped
     environment:

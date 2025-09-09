@@ -7,6 +7,7 @@ set -e
 
 # Configuration
 RESOURCE_GROUP="complai-directus-nextjs-kubernetes"
+LOCATION="westeurope"
 AKS_CLUSTER="complai-aks"
 ACR_NAME="complaiacr"
 NAMESPACE="complai"
