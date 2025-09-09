@@ -1,0 +1,160 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: directus-deployment
+  namespace: complai
+  labels:
+    app: directus
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: directus
+  template:
+    metadata:
+      labels:
+        app: directus
+    spec:
+      containers:
+      - name: directus
+        image: directus/directus:latest
+        ports:
+        - containerPort: 8055
+        env:
+        # Database Configuration
+        - name: DIRECTUS_DATABASE_CLIENT
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_DATABASE_CLIENT
+        - name: DIRECTUS_DATABASE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_DATABASE_HOST
+        - name: DIRECTUS_DATABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_DATABASE_PORT
+        - name: DIRECTUS_DATABASE_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_DATABASE_DATABASE
+        - name: DIRECTUS_DATABASE_USER
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_DATABASE_USER
+        - name: DIRECTUS_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: complai-secrets
+              key: postgres-password
+        - name: DIRECTUS_DATABASE_SSL
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_DATABASE_SSL
+        
+        # Admin Configuration
+        - name: DIRECTUS_ADMIN_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_ADMIN_EMAIL
+        - name: DIRECTUS_ADMIN_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_ADMIN_PASSWORD
+        
+        # Security Configuration
+        - name: DIRECTUS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: complai-secrets
+              key: directus-key
+        - name: DIRECTUS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: complai-secrets
+              key: directus-secret
+        - name: DIRECTUS_JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: complai-secrets
+              key: jwt-secret
+        - name: DIRECTUS_ACCESS_TOKEN_TTL
+          valueFrom:
+            secretKeyRef:
+              name: complai-secrets
+              key: access-token-ttl
+        - name: DIRECTUS_REFRESH_TOKEN_TTL
+          valueFrom:
+            secretKeyRef:
+              name: complai-secrets
+              key: refresh-token-ttl
+        
+        # Public Configuration
+        - name: DIRECTUS_PUBLIC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_PUBLIC_URL
+        - name: DIRECTUS_CORS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_CORS_ENABLED
+        - name: DIRECTUS_CORS_ORIGIN
+          valueFrom:
+            configMapKeyRef:
+              name: complai-config
+              key: DIRECTUS_CORS_ORIGIN
+        
+        # Additional Directus Settings
+        - name: DIRECTUS_LOG_LEVEL
+          value: "info"
+        - name: DIRECTUS_LOG_STYLE
+          value: "pretty"
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /server/ping
+            port: 8055
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /server/ping
+            port: 8055
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command: ['sh', '-c', 'until pg_isready -h postgres-service -p 5432; do echo waiting for postgres; sleep 2; done;']
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: directus-service
+  namespace: complai
+  labels:
+    app: directus
+spec:
+  selector:
+    app: directus
+  ports:
+  - port: 8055
+    targetPort: 8055
+  type: ClusterIP

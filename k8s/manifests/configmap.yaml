@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: complai-config
+  namespace: complai
+data:
+  # PostgreSQL Configuration
+  POSTGRES_DB: "directus"
+  POSTGRES_USER: "directus"
+  
+  # Directus Configuration
+  DIRECTUS_DATABASE_CLIENT: "pg"
+  DIRECTUS_DATABASE_HOST: "postgres-service"
+  DIRECTUS_DATABASE_PORT: "5432"
+  DIRECTUS_DATABASE_DATABASE: "directus"
+  DIRECTUS_DATABASE_USER: "directus"
+  DIRECTUS_DATABASE_SSL: "false"
+  
+  # Directus Admin
+  DIRECTUS_ADMIN_EMAIL: "admin@complai.com"
+  DIRECTUS_ADMIN_PASSWORD: "admin123"
+  
+  # Directus Settings
+  DIRECTUS_PUBLIC_URL: "https://directus.complai.com"
+  DIRECTUS_CORS_ENABLED: "true"
+  DIRECTUS_CORS_ORIGIN: "https://app.complai.com"
+  
+  # Next.js Configuration
+  NEXT_PUBLIC_DIRECTUS_URL: "https://directus.complai.com"
+  NEXT_PUBLIC_APP_URL: "https://app.complai.com"
