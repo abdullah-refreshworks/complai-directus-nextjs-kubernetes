@@ -1,0 +1,13 @@
+{
+  "name": "complai-directus",
+  "version": "1.0.0",
+  "description": "Directus CMS for Complai",
+  "main": "index.js",
+  "scripts": {
+    "start": "directus start",
+    "dev": "directus start --watch"
+  },
+  "dependencies": {
+    "directus": "^10.8.0"
+  }
+}

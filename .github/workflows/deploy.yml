@@ -10,7 +10,7 @@ env:
   AZURE_CONTAINER_REGISTRY: complaiacr.azurecr.io
   CONTAINER_NAME_FRONTEND: frontend
   CONTAINER_NAME_DIRECTUS: directus
-  RESOURCE_GROUP: complai-rg
+  RESOURCE_GROUP: complai-directus-nextjs-kubernetes
   CLUSTER_NAME: complai-aks
   NAMESPACE: complai
 

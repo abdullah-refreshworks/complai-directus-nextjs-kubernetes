@@ -6,7 +6,7 @@
 set -e
 
 # Configuration variables
-RESOURCE_GROUP="complai-rg"
+RESOURCE_GROUP="complai-directus-nextjs-kubernetes"
 LOCATION="eastus"
 AKS_CLUSTER="complai-aks"
 ACR_NAME="complaiacr"

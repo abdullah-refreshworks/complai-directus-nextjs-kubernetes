@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: complai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: directus
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: directus123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U directus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  directus:
+    build: ./directus
+    container_name: complai-directus
+    restart: unless-stopped
+    environment:
+      # Database
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: directus
+      DB_USER: directus
+      DB_PASSWORD: directus123
+      
+      # Admin
+      ADMIN_EMAIL: admin@complai.com
+      ADMIN_PASSWORD: admin123
+      
+      # Security
+      KEY: directus123
+      SECRET: directus-secret-123
+      JWT_SECRET: jwt-secret-123
+      
+      # Public
+      PUBLIC_URL: http://localhost:8055
+      CORS_ENABLED: true
+      CORS_ORIGIN: http://localhost:3000
+      
+      # Logging
+      LOG_LEVEL: info
+      LOG_STYLE: pretty
+    ports:
+      - "8055:8055"
+    volumes:
+      - directus_uploads:/directus/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8055/server/ping', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build: ./frontend
+    container_name: complai-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_DIRECTUS_URL: http://localhost:8055
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      directus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+  directus_uploads:
